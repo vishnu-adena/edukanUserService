@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.adena</groupId>
-    <artifactId>EdhukanUserService</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>Edhukan UserService</name>
+    <artifactId>edukanUserService</artifactId>
+    <version>1.0.0</version>
+    <name>edukanUserService</name>
     <description>Edhukan UserService</description>
     <properties>
         <java.version>21</java.version>

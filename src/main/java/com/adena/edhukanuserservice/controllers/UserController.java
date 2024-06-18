@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin(origins = "https://localhost:3000")
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
     private UserService userService;
     @Autowired
@@ -63,6 +63,11 @@ public class UserController {
         boolean response = userService.changePassword(passwordChangeDTO);
         if (response)return "Successfully changed password";
         else return "Invalid password";
+    }
+
+    @GetMapping("/hello")
+    public String hello(){
+        return "Hello World";
     }
 
 
