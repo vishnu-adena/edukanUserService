@@ -77,6 +77,7 @@ public class SecurityConfig {
             throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
+
                         .anyRequest().permitAll()
                 )
                 .cors().disable()
@@ -147,6 +148,7 @@ public class SecurityConfig {
                             .map(c -> c.replaceFirst("^ROLE_", ""))
                             .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
                     claims.put("roles", roles);
+                    claims.put("userId",((CustomUserDetails)context.getPrincipal().getPrincipal()).getUserId());
                     claims.put("userId", ((CustomUserDetails) context.getPrincipal().getPrincipal()).getUserId());
                 });
             } else if (OAuth2TokenType.REFRESH_TOKEN.equals(context.getTokenType())) {

@@ -13,7 +13,7 @@ import java.util.Optional;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -26,8 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("user with "+username+ " not found");
         }
         Users users = usersOptional.get();
-        UserDetails userDetails = new CustomUserDetails(users);
 
-        return userDetails;
+        return new CustomUserDetails(users);
     }
 }

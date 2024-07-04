@@ -11,6 +11,7 @@ public class UserDTO {
     private String email;
     private List<Role> roles;
 
+
     public static UserDTO fromUser(Users user) {
         UserDTO userDTO = new UserDTO();
         userDTO.userId = user.getId();

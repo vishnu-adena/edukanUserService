@@ -2,62 +2,32 @@ package com.adena.edhukanuserservice.controllers;
 
 import com.adena.edhukanuserservice.DTOs.*;
 import com.adena.edhukanuserservice.exceptions.InvalidPasswordException;
-import com.adena.edhukanuserservice.exceptions.TokenInvalidException;
-import com.adena.edhukanuserservice.exceptions.UserAlreadyPresent;
 import com.adena.edhukanuserservice.exceptions.UserNotFoundException;
-import com.adena.edhukanuserservice.models.Token;
-import com.adena.edhukanuserservice.models.Users;
 import com.adena.edhukanuserservice.service.UserService;
+import com.nimbusds.jose.JOSEException;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.util.Map;
+import java.util.Objects;
+
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/users")
+@RequestMapping("/auth")
 public class UserController {
-    private UserService userService;
+
+    private final UserService userService;
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public Users signUp(@RequestBody SignupRequestDTO signupRequestDTO) throws UserAlreadyPresent {
-
-        Users user = userService.signUp(signupRequestDTO.getName(), signupRequestDTO.getEmail(), signupRequestDTO.getPassword());
-        SignUpResponseDTO signUpResponseDTO = SignUpResponseDTO.fromSignUpResponseDTO(user);
-        return user;
-
-    }
-
-    @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO loginRequestDTO) throws UserNotFoundException, InvalidPasswordException {
-        LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
-        String token = userService.login(loginRequestDTO.getEmail(),loginRequestDTO.getPassword());
-        loginResponseDTO.setToken(token);
-        loginResponseDTO.setMessage("Successfully logged in");
-        return loginResponseDTO;
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody LogoutRequestDTO requestDTO) throws TokenInvalidException {
-
-        Token token = userService.logout(requestDTO.getToken());
-        ResponseEntity<String> responseEntity = new ResponseEntity<>(
-                token.isDeleted()==true ?"Successfully logged out":"Invalid token",
-                token.isDeleted()==true ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR
-        );
-        return responseEntity;
-    }
-
-    @GetMapping("/validate/{tokenValue}")
-    public Token validateToken(@PathVariable String tokenValue) throws TokenInvalidException {
-        Token token = userService.validateToken(tokenValue);
-        //UserDTO userDTO = UserDTO.fromUser(token.getUser());
-        return token;
-    }
     @PostMapping("/changePassword")
     public String changePassword(@RequestBody PasswordChangeDTO passwordChangeDTO) throws InvalidPasswordException {
         boolean response = userService.changePassword(passwordChangeDTO);
@@ -65,9 +35,23 @@ public class UserController {
         else return "Invalid password";
     }
 
-    @GetMapping("/hello")
-    public String hello(){
-        return "Hello World";
+    @GetMapping("/user")
+    public ResponseEntity<?> getUser(@RequestHeader Map<String, String> headers) throws UserNotFoundException, ParseException, JOSEException {
+
+        String token = "";
+        String authorization = headers.get("authorization");
+        if (Objects.equals(authorization, null)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (authorization.startsWith("Bearer ")) {
+            token = authorization.substring(7);
+        }
+
+        Claims claims = userService.getUser(token);
+
+        return new ResponseEntity<>(claims,HttpStatus.OK);
+
     }
 
 

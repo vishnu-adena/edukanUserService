@@ -1,4 +1,4 @@
-package com.adena.edhukanuserservice.service;
+package com.adena.edhukanuserservice.utils;
 
 import com.adena.edhukanuserservice.models.Users;
 import com.adena.edhukanuserservice.models.Role;
@@ -6,12 +6,12 @@ import com.adena.edhukanuserservice.respository.UserRepository;
 import com.adena.edhukanuserservice.securityconfig.models.Authorization;
 import com.adena.edhukanuserservice.securityconfig.repository.AuthorizationRepository;
 import com.nimbusds.jose.JOSEException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +65,13 @@ public class JwtTokenProvider {
         RSAPrivateKey privateKey = rsaKey.toRSAPrivateKey();
 
         String accessToken = Jwts.builder()
-                .setSubject(username)
+                .subject(username)
                 .setAudience("edukan")
-                .setNotBefore(now)
+                .notBefore(now)
                 .claim("scope", List.of("ADMIN"))
-                .setIssuer("http://localhost:8081") // Use a dynamic issuer value
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
+                .issuer("http://localhost:8089") // Use a dynamic issuer value
+                .issuedAt(now)
+                .expiration(expiryDate)
                 .claim("roles", roles)
                 .claim("userId", user.getId())
                 .claim("jti", jti)
@@ -99,67 +99,6 @@ public class JwtTokenProvider {
 
         return accessToken;
     }
-
-//    private RSAKey getRSAKey() {
-//        try {
-//            // Create a JWKSelector to select RSA keys
-//            JWKSelector selector = new JWKSelector(new JWKMatcher.Builder()
-//                    .keyType(KeyType.RSA) // Specify that we want RSA keys
-//                    .build());
-//
-//            // Retrieve the JWK set from the JWKSource
-//            JWKSet jwkSet = (JWKSet) jwkSource.get(selector,new SecurityContext() {
-//                // Implement SecurityContext if necessary; otherwise, use a default implementation
-//            });
-//
-//            // Apply the selector to the JWK set
-//            List<JWK> selectedKeys = selector.select(jwkSet);
-//
-//            return (RSAKey) selectedKeys.stream()
-//                    .filter(key -> key instanceof RSAKey)
-//                    .findFirst()
-//                    .orElseThrow(() -> new RuntimeException("No RSA key found"));
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to retrieve RSA key from JWKSource", e);
-//        }
-//    }
-//private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
-//
-//    private RSAKey getRSAKey() {
-//        try {
-//            // Create a JWKSelector to select RSA keys
-//            JWKSelector selector = new JWKSelector(new JWKMatcher.Builder()
-//                    .keyType(KeyType.RSA) // Specify that we want RSA keys
-//                    .build());
-//            System.out.println(jwkSource);
-//
-//            // Retrieve the JWK set from the JWKSource
-//            JWKSet jwkSet = (JWKSet) jwkSource.get(selector,new SecurityContext() {
-//                // Implement SecurityContext if necessary; otherwise, use a default implementation
-//            });
-//
-//            if (jwkSet == null) {
-//                throw new RuntimeException("JWKSet is null. No keys could be retrieved.");
-//            }
-//
-//            // Apply the selector to the JWK set
-//            List<JWK> selectedKeys = selector.select(jwkSet);
-//
-//            if (selectedKeys.isEmpty()) {
-//                throw new RuntimeException("No RSA keys found in the JWKSet.");
-//            }
-//
-//            return (RSAKey) selectedKeys.stream()
-//                    .filter(key -> key instanceof RSAKey)
-//                    .findFirst()
-//                    .orElseThrow(() -> new RuntimeException("No RSA key found"));
-//
-//        } catch (Exception e) {
-//            LOGGER.error("Failed to retrieve RSA key from JWKSource", e);
-//            throw new RuntimeException("Failed to retrieve RSA key from JWKSource", e);
-//        }
-//    }
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenProvider.class);
 
